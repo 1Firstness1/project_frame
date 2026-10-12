@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "code": "pending",
+        "title": "ожидает"
+    },
+    {
+        "id": 2,
+        "code": "confirmed",
+        "title": "подтверждено"
+    },
+    {
+        "id": 3,
+        "code": "declined",
+        "title": "отклонено"
+    }
+]
