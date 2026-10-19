@@ -9,7 +9,9 @@ from utils import next_id
 class Event:
     """Событие, на которое приглашаются гости."""
 
-    def __init__(self, event_id: int, name: str, date: str, places: int) -> None:
+    def __init__(
+        self, event_id: int, name: str, date: str, places: int
+    ) -> None:
         self.id = event_id
         self.name = name
         self.date = date
@@ -73,7 +75,9 @@ def find_events(events: List[Event], query: str) -> List[Event]:
     return [event for event in events if query_lower in event.name.lower()]
 
 
-def filter_events_by_places(events: List[Event], min_places: int) -> List[Event]:
+def filter_events_by_places(
+    events: List[Event], min_places: int
+) -> List[Event]:
     """Отобрать события с числом мест не меньше min_places."""
     return [event for event in events if event.fits_places(min_places)]
 

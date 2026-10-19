@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if invitation %}
+        Приглашение №{{ invitation.id }} — Сервис гостей
+    {% else %}
+        Приглашение не найдено — Сервис гостей
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if invitation %}
+    <div class="card invitation-card">
+        <div class="card-body">
+            <h1 class="card-title h3">Приглашение №{{ invitation.id }}</h1>
+            <p class="card-text">
+                <strong>Гость:</strong> {{ invitation.guest.name }}
+            </p>
+            <p class="card-text">
+                <strong>Событие:</strong> {{ invitation.event.name }}
+            </p>
+            <p class="card-text">
+                <strong>Дата события:</strong> {{ invitation.event.date }}
+            </p>
+            <p class="card-text">
+                <strong>Статус:</strong>
+                {% include "invitations/includes/invitation_status.html" %}
+            </p>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <h1 class="h4 text-danger mb-2">Приглашение не найдено</h1>
+        <p class="mb-0">Приглашение с указанным идентификатором отсутствует.</p>
+    </div>
+{% endif %}
+
+<a href="{% url 'invitations:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку приглашений
+</a>
+{% endblock %}

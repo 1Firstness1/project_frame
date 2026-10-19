@@ -68,7 +68,9 @@ def add_status(statuses: List[Status], code: str, title: str) -> Status:
     return status
 
 
-def find_status_by_id(statuses: List[Status], status_id: int) -> Optional[Status]:
+def find_status_by_id(
+    statuses: List[Status], status_id: int
+) -> Optional[Status]:
     """Найти статус по идентификатору."""
     for status in statuses:
         if status.id == status_id:

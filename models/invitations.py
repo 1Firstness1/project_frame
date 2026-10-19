@@ -6,7 +6,7 @@ from typing import List, Optional
 from utils import next_id
 from .events import Event
 from .guests import Guest
-from .statuses import Status, CODE_PENDING, CODE_CONFIRMED, CODE_DECLINED
+from .statuses import Status
 
 
 class Invitation:
@@ -45,7 +45,9 @@ class Invitation:
         return self.status.is_declined()
 
     @classmethod
-    def from_data(cls, data: dict, event: Event, guest: Guest, status: Status) -> "Invitation":
+    def from_data(
+        cls, data: dict, event: Event, guest: Guest, status: Status
+    ) -> "Invitation":
         """Создать объект Invitation из данных JSON и связанных объектов."""
         return cls(
             invitation_id=data["id"],

@@ -1,0 +1,30 @@
+body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.guestlist-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.event-card,
+.guest-card,
+.invitation-card {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.event-card:hover,
+.guest-card:hover,
+.invitation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.invitation-status {
+    font-weight: 600;
+}

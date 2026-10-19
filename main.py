@@ -17,7 +17,6 @@ from models import Event, Guest, Status, Invitation
 from models.events import (
     add_event,
     find_event_by_id,
-    find_events,
     sort_events_by_places,
     show_events,
 )

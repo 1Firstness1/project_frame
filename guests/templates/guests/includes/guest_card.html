@@ -1,0 +1,21 @@
+<article class="card guest-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title h5">
+            {{ guest.name|default:"Без имени" }}
+        </h2>
+        <p class="card-text text-muted mb-1">
+            <strong>Возраст:</strong> {{ guest.age }}
+        </p>
+        <p class="card-text mb-3">
+            <strong>Статус:</strong>
+            {% if guest.is_adult %}
+                <span class="badge bg-success">совершеннолетний</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">несовершеннолетний</span>
+            {% endif %}
+        </p>
+        <a href="{% url 'guests:detail' guest.id %}" class="btn btn-primary">
+            Подробнее
+        </a>
+    </div>
+</article>

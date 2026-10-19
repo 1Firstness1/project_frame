@@ -1,202 +1,284 @@
 # Сервис управления списком гостей
 
-Веб-приложение на Django для учёта событий, гостей, статусов
-приглашений и самих приглашений. Консольная версия (ПР3) сохранена
-и продолжает работать.
+Учебное приложение для учёта событий, гостей и приглашений на Python с веб-интерфейсом на Django.
+Консольная версия приложения (ПР3) сохранена и продолжает работать. Веб-интерфейс переведён на систему шаблонов Django Template Language (ПР6).
 
-## Используемые технологии
+## 1. Назначение проекта
+
+Сервис помогает организатору мероприятий вести список гостей, отслеживать статус приглашений и контролировать количество свободных мест.
+Проект развивается поэтапно: консольная версия дополнена веб-интерфейсом и последовательно переводится на возможности Django.
+
+## 2. Используемые технологии
 
 - Python 3;
 - Django 5.2;
-- HTML, CSS, Bootstrap 5.3;
-- pytest, flake8.
+- Django Template Language (DTL);
+- HTML5;
+- CSS3 и собственный файл стилей;
+- JavaScript;
+- Bootstrap 5.3;
+- JSON для хранения данных;
+- Git;
+- pytest;
+- flake8.
 
-## Назначение
+## 3. Предметная область
 
-Приложение помогает организатору мероприятия вести список гостей,
-отслеживать статус приглашений и контролировать количество
-свободных мест на событии.
+В системе используются четыре основные сущности:
+- **Событие (Event)** — идентификатор, название, дата и лимит мест;
+- **Гость (Guest)** — идентификатор, имя, возраст и проверка совершеннолетия;
+- **Статус (Status)** — идентификатор, символьный код (`confirmed`, `pending`, `declined`) и название;
+- **Приглашение (Invitation)** — идентификатор, связывает объект события, объект гостя и объект статуса.
 
-## Целевая аудитория
+Для предметной области реализованы собственные Python-классы в пакете `models/`.
+На текущем этапе данные хранятся в JSON-файлах. Django ORM и база данных приложения пока не используются.
 
-Организаторы частных и корпоративных мероприятий: дни рождения,
-свадьбы, конференции, встречи команд.
-
-## Предметная область
-
-Управление приглашениями на событие: учёт гостей, подтверждение
-участия, контроль лимита мест.
-
-## Основные сущности (ПР3)
-
-### Event — событие
-Атрибуты: `id`, `name`, `date`, `places`.
-Методы: `fits_places()`, `validate_places()` (`@staticmethod`),
-`from_data()` (`@classmethod`), `to_data()`, `__str__()`.
-
-### Guest — гость
-
-Атрибуты: `id`, `name`, `age`.
-
-Методы: `is_adult()`, `validate_age()` (`@staticmethod`),
-`from_data()`, `to_data()`, `__str__()`.
-
-### Status — статус приглашения
-
-Атрибуты: `id`, `code`, `title`.
-
-Методы: `is_confirmed()`, `is_pending()`, `is_declined()`,
-`validate_code()` (`@staticmethod`), `from_data()`, `to_data()`,
-`__str__()`.
-
-Допустимые коды: `pending`, `confirmed`, `declined`.
-
-### Invitation — приглашение
-
-Связывает `Event`, `Guest` и `Status`.
-
-Атрибуты: `id`, `event`, `guest`, `status`.
-
-Методы: `confirm()`, `decline()`, `reset()`, `is_confirmed()`,
-`is_pending()`, `is_declined()`, `from_data()`, `to_data()`,
-`__str__()`.
-
-## Возможности веб-интерфейса
-
-- просмотр списка событий и карточки события;
-- просмотр списка гостей и карточки гостя;
-- просмотр приглашений выбранного гостя;
-- просмотр списка приглашений и карточки приглашения;
-- отображение статуса приглашения цветным бейджем;
-- пользовательская страница 404.
-
-## Страницы и URL
-
-| Страница | URL | View |
-|---|---|---|
-| Главная | `/` | `homepage.views.index` |
-| События | `/events/` | `events.views.events` |
-| Событие | `/events/<int:event_id>/` | `events.views.event_detail` |
-| Гости | `/guests/` | `guests.views.guests` |
-| Гость | `/guests/<int:guest_id>/` | `guests.views.guest_detail` |
-| Приглашения гостя | `/guests/<int:guest_id>/invitations/` | `guests.views.guest_invitations` |
-| Приглашения | `/invitations/` | `invitations.views.invitations` |
-| Приглашение | `/invitations/<int:invitation_id>/` | `invitations.views.invitation_detail` |
-
-## Структура проекта
+## 4. Структура проекта
 
 ```text
 guest-list-service/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── manage.py
-├── main.py                    (консольная версия из ПР3)
-├── storage.py                 (из ПР3)
-├── utils.py                   (из ПР3)
-├── models/                    (пакет предметной области из ПР3)
+├── templates/
+│   ├── includes/
+│   │   └── navigation.html
+│   ├── base.html
+│   └── 404.html
+│
+├── homepage/
+│   ├── static/
+│   │   └── homepage/
+│   │       ├── css/
+│   │       │   └── style.css
+│   │       ├── img/
+│   │       │   └── logo.png
+│   │       └── js/
+│   │           └── main.js
+│   ├── templates/
+│   │   └── homepage/
+│   │       └── index.html
+│   ├── apps.py
+│   ├── urls.py
+│   └── views.py
+│
+├── events/
+│   ├── templates/
+│   │   └── events/
+│   │       ├── includes/
+│   │       │   └── event_card.html
+│   │       ├── event_detail.html
+│   │       └── event_list.html
+│   ├── apps.py
+│   ├── urls.py
+│   └── views.py
+│
+├── guests/
+│   ├── templates/
+│   │   └── guests/
+│   │       ├── includes/
+│   │       │   └── guest_card.html
+│   │       ├── guest_detail.html
+│   │       ├── guest_invitations.html
+│   │       └── guest_list.html
+│   ├── apps.py
+│   ├── urls.py
+│   └── views.py
+│
+├── invitations/
+│   ├── templates/
+│   │   └── invitations/
+│   │       ├── includes/
+│   │       │   ├── invitation_card.html
+│   │       │   └── invitation_status.html
+│   │       ├── invitation_detail.html
+│   │       └── invitation_list.html
+│   ├── apps.py
+│   ├── urls.py
+│   └── views.py
+│
+├── guestlist/                     (пакет конфигурации Django-проекта)
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── models/                        (пакет предметной области из ПР3)
 │   ├── __init__.py
 │   ├── events.py
 │   ├── guests.py
 │   ├── statuses.py
 │   └── invitations.py
+│
 ├── data/
 │   ├── events.json
 │   ├── guests.json
 │   ├── statuses.json
 │   └── invitations.json
-├── tests/                     (тесты ПР3)
+│
+├── tests/                         (автоматизированные тесты pytest)
 │   ├── test_events.py
 │   ├── test_guests.py
 │   ├── test_statuses.py
 │   └── test_invitations.py
-├── guestlist/                 (Django-проект)
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── homepage/                  (Django-приложение)
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── migrations/
-│   ├── models.py
-│   ├── tests.py
-│   ├── urls.py
-│   └── views.py
-├── events/                    (Django-приложение)
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── migrations/
-│   ├── models.py
-│   ├── tests.py
-│   ├── urls.py
-│   └── views.py
-├── guests/                    (Django-приложение)
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── migrations/
-│   ├── models.py
-│   ├── tests.py
-│   ├── urls.py
-│   └── views.py
-└── invitations/               (Django-приложение)
-    ├── __init__.py
-    ├── admin.py
-    ├── apps.py
-    ├── migrations/
-    ├── models.py
-    ├── tests.py
-    ├── urls.py
-    └── views.py
+│
+├── main.py                        (консольная версия из ПР3)
+├── storage.py                     (модуль загрузки/сохранения JSON)
+├── utils.py                       (вспомогательные функции)
+├── manage.py
+├── pytest.ini
+├── requirements.txt
+└── README.md
 ```
 
-## Хранение данных
+## 5. Веб-интерфейс
 
+Веб-часть приложения полностью переведена на Django-шаблоны.
+Основные страницы:
+- Главная страница (`/`);
+- Список событий (`/events/`);
+- Страница отдельного события (`/events/<int:event_id>/`);
+- Список гостей (`/guests/`);
+- Страница отдельного гостя (`/guests/<int:guest_id>/`);
+- Список приглашений выбранного гостя (`/guests/<int:guest_id>/invitations/`);
+- Список приглашений (`/invitations/`);
+- Страница отдельного приглашения (`/invitations/<int:invitation_id>/`);
+- Пользовательская страница ошибки 404.
+
+Генерация HTML непосредственно в Python-коде не используется (функция `page()` удалена).
+Представления подготавливают данные и передают их в шаблоны через словарь контекста.
+
+## 6. Django Template Language
+
+### Базовый шаблон
+Общий шаблон страниц — `templates/base.html`.
+Он содержит общую HTML-структуру страницы, подключение Bootstrap, подключение собственных стилей `style.css`, логотипа `logo.png`, навигации `navigation.html`, подвала с автоматической установкой года через `main.js` и блоки для содержимого отдельных страниц:
+- `{% block title %}` — заголовок страницы;
+- `{% block content %}` — основное содержимое.
+
+Дочерние шаблоны используют наследование:
+```html
+{% extends "base.html" %}
+```
+
+### Включаемые шаблоны
+Повторяющиеся фрагменты вынесены во включаемые шаблоны:
+- `templates/includes/navigation.html` — общая навигация сайта;
+- `events/templates/events/includes/event_card.html` — карточка события;
+- `guests/templates/guests/includes/guest_card.html` — карточка гостя;
+- `invitations/templates/invitations/includes/invitation_card.html` — карточка приглашения в списке;
+- `invitations/templates/invitations/includes/invitation_status.html` — цветной бейдж статуса приглашения.
+
+Подключение выполняется тегом `{% include "..." %}`.
+
+### Контекст
+Представления передают данные в шаблоны через словарь `context`.
+Например, во view:
+```python
+context = {"events": events_list}
+return render(request, "events/event_list.html", context)
+```
+В шаблоне данные доступны по именам ключей словаря: `{{ events }}`.
+
+### Циклы и условия
+Для формирования списков используются циклы `{% for %}` с веткой отсутствия данных `{% empty %}`:
+```html
+{% for event in events %}
+    {% include "events/includes/event_card.html" %}
+{% empty %}
+    <p>События не найдены.</p>
+{% endfor %}
+```
+Условия `{% if %}` используются для отображения статусов, проверки совершеннолетия гостя и обработки отсутствия объектов на детальных страницах.
+
+## 7. Фильтры шаблонов
+
+В шаблонах применяются стандартные фильтры Django:
+- `{{ events|length }}` — подсчёт общего количества элементов в списке;
+- `{{ event.name|default:"Без названия" }}` — вывод значения по умолчанию при отсутствии имени.
+
+Фильтры используются исключительно для форматирования представления и не содержат бизнес-логику.
+
+## 8. URL-маршрутизация и пространства имён
+
+Для всех приложений настроены пространства имён (`app_name`):
+- `homepage` (`homepage:index`);
+- `events` (`events:list`, `events:detail`);
+- `guests` (`guests:list`, `guests:detail`, `guests:invitations`);
+- `invitations` (`invitations:list`, `invitations:detail`).
+
+Ссылки в шаблонах формируются исключительно через тег `{% url %}`, например:
+```html
+<a href="{% url 'events:list' %}">События</a>
+<a href="{% url 'events:detail' event.id %}">Подробнее</a>
+```
+
+## 9. Статические файлы
+
+Статические файлы проекта размещены в приложении `homepage`:
+`homepage/static/homepage/`
+- `css/style.css` — собственные стили для карточек (`.event-card`, `.guest-card`, `.invitation-card`), логотипа (`.guestlist-logo`) и бейджей;
+- `js/main.js` — клиентский скрипт, автоматически устанавливающий текущий год в футере;
+- `img/logo.png` — графический логотип проекта.
+
+Для подключения статики в базовом шаблоне используется `{% load static %}` и теги `{% static "..." %}`.
+
+## 10. Хранение данных
+
+Данные приложения по-прежнему хранятся в JSON-файлах:
 - `data/events.json`;
 - `data/guests.json`;
 - `data/statuses.json`;
 - `data/invitations.json`.
 
-При загрузке JSON преобразуется в объекты `Event`, `Guest`, `Status`,
-`Invitation` (ПР3). Веб-слой использует функции `storage.py` и
-`models/*.py`, не дублируя предметную логику.
+Загрузка данных выполняется функциями модуля `storage.py`. Предметные объекты создаются на основе классов каталога `models/`.
+Django ORM на текущем этапе не используется.
 
-## Запуск веб-версии
+## 11. Запуск проекта
 
+Веб-версия (Django):
 ```text
-python manage.py migrate
 python manage.py runserver
 ```
+После запуска веб-интерфейс доступен по адресу:
+`http://127.0.0.1:8000/`
 
-Откройте `http://127.0.0.1:8000/`.
-
-## Запуск консольной версии
-
+Консольная версия:
 ```text
 python main.py
 ```
 
-## Тесты
+## 12. Тестирование и качество кода
 
+Запуск автоматических тестов:
 ```text
 pytest -v
 ```
 
-## Проверка качества кода
-
+Системная проверка Django:
 ```text
-flake8 . --extend-exclude=venv
+python manage.py check
 ```
 
-## План развития
+Проверка соответствия PEP 8 (flake8):
+```text
+flake8 . --extend-exclude=.venv
+```
 
-- перенос сущностей в Django ORM и подключение базы данных;
-- переход на Django-шаблоны (`templates/`) и отказ от функции `page()`;
-- формы создания и редактирования событий, гостей и приглашений;
-- пользователи и аутентификация;
-- REST API;
-- контейнеризация и CI/CD.
+## 13. Текущее состояние и дальнейшее развитие
+
+Реализовано в ПР6:
+- Веб-интерфейс полностью переведён на Django-шаблоны;
+- Создан базовый каркас `templates/base.html`;
+- Организовано наследование шаблонов (`extends`) и блоки (`block`);
+- Вынесены включаемые шаблоны (`include`);
+- Настроена передача данных через контекст;
+- Использованы циклы (`for`), ветки `empty` и условия (`if`);
+- Настроены именованные маршруты и пространства имён (`app_name`);
+- Применены фильтры шаблонов (`length`, `default`);
+- Подключены собственные статические файлы (CSS, JS, логотип);
+- Сохранена полная работоспособность консольной версии и тестов ПР3.
+
+Планируется на следующих этапах:
+- Переход от JSON-файлов к реляционной базе данных и Django ORM;
+- Формы создания, изменения и удаления объектов;
+- Аутентификация и разграничение прав пользователей;
+- Разработка REST API;
+- Контейнеризация и настройка CI/CD.

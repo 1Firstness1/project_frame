@@ -1,4 +1,1 @@
-from django.test import TestCase
-
-# Тесты Django-приложения будут добавлены в следующих работах.
-# Тесты предметной области находятся в каталоге tests/ (ПР3).
+# Create your tests here.

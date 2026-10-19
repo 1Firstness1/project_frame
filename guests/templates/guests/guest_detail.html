@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if guest %}
+        {{ guest.name }} — Сервис гостей
+    {% else %}
+        Гость не найден — Сервис гостей
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if guest %}
+    <div class="card guest-card">
+        <div class="card-body">
+            <h1 class="card-title h3">{{ guest.name }}</h1>
+            <p class="card-text"><strong>ID:</strong> {{ guest.id }}</p>
+            <p class="card-text"><strong>Возраст:</strong> {{ guest.age }}</p>
+            <p class="card-text">
+                <strong>Статус:</strong>
+                {% if guest.is_adult %}
+                    <span class="badge bg-success">совершеннолетний</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">несовершеннолетний</span>
+                {% endif %}
+            </p>
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'guests:list' %}" class="btn btn-outline-secondary">
+                    ← к списку гостей
+                </a>
+                <a href="{% url 'guests:invitations' guest.id %}" class="btn btn-outline-primary">
+                    Приглашения гостя
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <h1 class="h4 text-danger mb-2">Гость не найден</h1>
+        <p class="mb-0">Гость с указанным идентификатором отсутствует.</p>
+    </div>
+    <a href="{% url 'guests:list' %}" class="btn btn-outline-secondary mt-3">
+        ← к списку гостей
+    </a>
+{% endif %}
+{% endblock %}

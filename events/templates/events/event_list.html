@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}События — Сервис гостей{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">События</h1>
+    <span class="badge bg-secondary fs-6">Всего событий: {{ events|length }}</span>
+</div>
+
+{% for event in events %}
+    {% include "events/includes/event_card.html" %}
+{% empty %}
+    <p class="text-muted">События не найдены.</p>
+{% endfor %}
+{% endblock %}

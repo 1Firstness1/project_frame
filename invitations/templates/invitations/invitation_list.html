@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Приглашения — Сервис гостей{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">Приглашения</h1>
+    <span class="badge bg-secondary fs-6">Всего приглашений: {{ invitations|length }}</span>
+</div>
+
+{% for invitation in invitations %}
+    {% include "invitations/includes/invitation_card.html" %}
+{% empty %}
+    <p class="text-muted">Приглашения не найдены.</p>
+{% endfor %}
+{% endblock %}

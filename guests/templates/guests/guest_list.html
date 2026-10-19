@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Гости — Сервис гостей{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">Гости</h1>
+    <span class="badge bg-secondary fs-6">Всего гостей: {{ guests|length }}</span>
+</div>
+
+{% for guest in guests %}
+    {% include "guests/includes/guest_card.html" %}
+{% empty %}
+    <p class="text-muted">Гости не найдены.</p>
+{% endfor %}
+{% endblock %}

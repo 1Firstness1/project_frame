@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if event %}
+        {{ event.name }} — Сервис гостей
+    {% else %}
+        Событие не найдено — Сервис гостей
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if event %}
+    <div class="card event-card">
+        <div class="card-body">
+            <h1 class="card-title h3">{{ event.name }}</h1>
+            <p class="card-text"><strong>ID:</strong> {{ event.id }}</p>
+            <p class="card-text"><strong>Дата:</strong> {{ event.date }}</p>
+            <p class="card-text"><strong>Количество мест:</strong> {{ event.places }}</p>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <h1 class="h4 text-danger mb-2">Событие не найдено</h1>
+        <p class="mb-0">Событие с указанным идентификатором отсутствует.</p>
+    </div>
+{% endif %}
+
+<a href="{% url 'events:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку событий
+</a>
+{% endblock %}
