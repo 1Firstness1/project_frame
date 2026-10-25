@@ -8,7 +8,7 @@
         </p>
         <p class="card-text mb-3">
             <strong>Статус:</strong>
-            {% if guest.is_adult %}
+            {% if guest.age >= 18 %}
                 <span class="badge bg-success">совершеннолетний</span>
             {% else %}
                 <span class="badge bg-warning text-dark">несовершеннолетний</span>

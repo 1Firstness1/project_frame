@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск событий — Сервис гостей{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Поиск событий по вместимости</h1>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <label for="min_places" class="col-form-label fw-semibold">
+            Минимальное количество мест:
+        </label>
+    </div>
+    <div class="col-auto">
+        <input type="number"
+               class="form-control"
+               id="min_places"
+               name="min_places"
+               value="{{ min_places }}"
+               placeholder="Например, 20"
+               min="1"
+               required>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Найти</button>
+        <a href="{% url 'events:search' %}" class="btn btn-outline-secondary">Сброс</a>
+    </div>
+</form>
+
+{% if min_places %}
+    <h2 class="h4 mb-3">Результаты поиска (мест &gt;= {{ min_places }}):</h2>
+    {% for event in events %}
+        {% include "events/includes/event_card.html" %}
+    {% empty %}
+        <p class="text-muted">События с такой вместимостью не найдены.</p>
+    {% endfor %}
+{% endif %}
+
+<a href="{% url 'events:list' %}" class="btn btn-outline-secondary mt-3">
+    ← ко всем событиям
+</a>
+{% endblock %}

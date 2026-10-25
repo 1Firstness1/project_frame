@@ -1,19 +1,26 @@
-"""View-функции приложения guests."""
+"""View-функции приложения guests, работающие со слоем SQLite."""
 
+import sqlite3
 from django.shortcuts import render
 
-from models.guests import find_guest_by_id
-from storage import (
-    load_events,
-    load_guests,
-    load_invitations,
-    load_statuses,
-)
+from db.database import get_connection
 
 
 def guests(request):
-    """Страница со списком гостей."""
-    guests_list = load_guests("data/guests.json")
+    """Страница со списком гостей из SQLite."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        guests_list = conn.execute(
+            """
+            SELECT id, name, age
+            FROM guests
+            ORDER BY name ASC;
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
     context = {
         "guests": guests_list,
     }
@@ -21,9 +28,21 @@ def guests(request):
 
 
 def guest_detail(request, guest_id):
-    """Страница отдельного гостя."""
-    guests_list = load_guests("data/guests.json")
-    guest = find_guest_by_id(guests_list, guest_id)
+    """Страница отдельного гостя из SQLite."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        guest = conn.execute(
+            """
+            SELECT id, name, age
+            FROM guests
+            WHERE id = ?;
+            """,
+            (guest_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
     context = {
         "guest": guest,
     }
@@ -36,32 +55,47 @@ def guest_detail(request, guest_id):
 
 
 def guest_invitations(request, guest_id):
-    """Страница приглашений выбранного гостя."""
-    guests_list = load_guests("data/guests.json")
-    guest = find_guest_by_id(guests_list, guest_id)
+    """Страница приглашений выбранного гостя с JOIN из SQLite."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        guest = conn.execute(
+            """
+            SELECT id, name, age
+            FROM guests
+            WHERE id = ?;
+            """,
+            (guest_id,),
+        ).fetchone()
 
-    if guest is None:
-        return render(
-            request,
-            "guests/guest_invitations.html",
-            {"guest": None, "invitations": []},
-            status=404,
-        )
+        if guest is None:
+            return render(
+                request,
+                "guests/guest_invitations.html",
+                {"guest": None, "invitations": []},
+                status=404,
+            )
 
-    events_list = load_events("data/events.json")
-    statuses_list = load_statuses("data/statuses.json")
-    invitations_list = load_invitations(
-        "data/invitations.json",
-        events_list,
-        guests_list,
-        statuses_list,
-    )
-    user_invitations = [
-        inv for inv in invitations_list if inv.guest.id == guest.id
-    ]
+        invitations_list = conn.execute(
+            """
+            SELECT invitations.id,
+                   events.name AS event_name,
+                   events.date AS event_date,
+                   statuses.title AS status_title,
+                   statuses.code AS status_code
+            FROM invitations
+            JOIN events ON invitations.event_id = events.id
+            JOIN statuses ON invitations.status_id = statuses.id
+            WHERE invitations.guest_id = ?
+            ORDER BY events.date ASC;
+            """,
+            (guest_id,),
+        ).fetchall()
+    finally:
+        conn.close()
 
     context = {
         "guest": guest,
-        "invitations": user_invitations,
+        "invitations": invitations_list,
     }
     return render(request, "guests/guest_invitations.html", context)

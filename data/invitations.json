@@ -3,6 +3,36 @@
         "id": 1,
         "event_id": 1,
         "guest_id": 1,
+        "status_id": 2
+    },
+    {
+        "id": 2,
+        "event_id": 1,
+        "guest_id": 2,
+        "status_id": 2
+    },
+    {
+        "id": 3,
+        "event_id": 1,
+        "guest_id": 3,
+        "status_id": 1
+    },
+    {
+        "id": 4,
+        "event_id": 2,
+        "guest_id": 2,
+        "status_id": 2
+    },
+    {
+        "id": 5,
+        "event_id": 2,
+        "guest_id": 4,
+        "status_id": 3
+    },
+    {
+        "id": 6,
+        "event_id": 3,
+        "guest_id": 5,
         "status_id": 1
     }
 ]

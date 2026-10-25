@@ -23,15 +23,15 @@
             <tbody>
                 {% for inv in invitations %}
                     <tr>
-                        <td>{{ inv.event.name }}</td>
-                        <td>{{ inv.event.date }}</td>
+                        <td>{{ inv.event_name }}</td>
+                        <td>{{ inv.event_date }}</td>
                         <td>
-                            {% if inv.is_confirmed %}
-                                <span class="badge bg-success">{{ inv.status.title }}</span>
-                            {% elif inv.is_pending %}
-                                <span class="badge bg-warning text-dark">{{ inv.status.title }}</span>
+                            {% if inv.status_code == 'confirmed' %}
+                                <span class="badge bg-success">{{ inv.status_title }}</span>
+                            {% elif inv.status_code == 'pending' %}
+                                <span class="badge bg-warning text-dark">{{ inv.status_title }}</span>
                             {% else %}
-                                <span class="badge bg-secondary">{{ inv.status.title }}</span>
+                                <span class="badge bg-secondary">{{ inv.status_title }}</span>
                             {% endif %}
                         </td>
                     </tr>

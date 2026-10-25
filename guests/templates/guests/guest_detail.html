@@ -17,7 +17,7 @@
             <p class="card-text"><strong>Возраст:</strong> {{ guest.age }}</p>
             <p class="card-text">
                 <strong>Статус:</strong>
-                {% if guest.is_adult %}
+                {% if guest.age >= 18 %}
                     <span class="badge bg-success">совершеннолетний</span>
                 {% else %}
                     <span class="badge bg-warning text-dark">несовершеннолетний</span>

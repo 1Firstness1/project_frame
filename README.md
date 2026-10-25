@@ -1,42 +1,70 @@
 # Сервис управления списком гостей
 
-Учебное приложение для учёта событий, гостей и приглашений на Python с веб-интерфейсом на Django.
-Консольная версия приложения (ПР3) сохранена и продолжает работать. Веб-интерфейс переведён на систему шаблонов Django Template Language (ПР6).
+Учебное приложение для учёта событий, гостей и приглашений на Python с веб-интерфейсом на Django и слоем реляционной базы данных SQLite (ПР7).
+Консольная версия приложения (ПР3), JSON-хранилище и веб-интерфейс на Django Templates (ПР6) сохранены и продолжают работать.
 
 ## 1. Назначение проекта
 
-Сервис помогает организатору мероприятий вести список гостей, отслеживать статус приглашений и контролировать количество свободных мест.
-Проект развивается поэтапно: консольная версия дополнена веб-интерфейсом и последовательно переводится на возможности Django.
+Сервис помогает организатору мероприятий вести список гостей, отслеживать статус приглашений и контролировать количество свободных мест на событиях.
+Проект развивается поэтапно: консольная версия дополнена веб-интерфейсом и последовательно переводится на возможности реляционной базы данных и Django.
 
 ## 2. Используемые технологии
 
 - Python 3;
+- SQLite3 и стандартная библиотека `sqlite3`;
+- SQL (DDL, DML, DQL);
 - Django 5.2;
 - Django Template Language (DTL);
-- HTML5;
-- CSS3 и собственный файл стилей;
-- JavaScript;
-- Bootstrap 5.3;
-- JSON для хранения данных;
+- HTML5, CSS3, Bootstrap 5.3, JavaScript;
+- JSON для исходного хранения данных;
 - Git;
 - pytest;
 - flake8.
 
-## 3. Предметная область
+## 3. Предметная область и структура базы данных
 
 В системе используются четыре основные сущности:
-- **Событие (Event)** — идентификатор, название, дата и лимит мест;
-- **Гость (Guest)** — идентификатор, имя, возраст и проверка совершеннолетия;
-- **Статус (Status)** — идентификатор, символьный код (`confirmed`, `pending`, `declined`) и название;
-- **Приглашение (Invitation)** — идентификатор, связывает объект события, объект гостя и объект статуса.
+1. **События (`events`)**:
+   - `id` (INTEGER, PRIMARY KEY) — идентификатор события;
+   - `name` (TEXT, NOT NULL) — название события;
+   - `date` (TEXT, NOT NULL) — дата проведения (формат `YYYY-MM-DD`);
+   - `places` (INTEGER, NOT NULL) — количество мест.
+2. **Гости (`guests`)**:
+   - `id` (INTEGER, PRIMARY KEY) — идентификатор гостя;
+   - `name` (TEXT, NOT NULL) — имя гостя;
+   - `age` (INTEGER, NOT NULL) — возраст.
+3. **Статусы (`statuses`)**:
+   - `id` (INTEGER, PRIMARY KEY) — идентификатор статуса;
+   - `code` (TEXT, NOT NULL, UNIQUE) — символьный код (`pending`, `confirmed`, `declined`);
+   - `title` (TEXT, NOT NULL) — название статуса.
+4. **Приглашения (`invitations`)**:
+   - `id` (INTEGER, PRIMARY KEY) — идентификатор приглашения;
+   - `event_id` (INTEGER, NOT NULL, FOREIGN KEY -> `events.id`);
+   - `guest_id` (INTEGER, NOT NULL, FOREIGN KEY -> `guests.id`);
+   - `status_id` (INTEGER, NOT NULL, FOREIGN KEY -> `statuses.id`).
 
-Для предметной области реализованы собственные Python-классы в пакете `models/`.
-На текущем этапе данные хранятся в JSON-файлах. Django ORM и база данных приложения пока не используются.
+Внешние ключи гарантируют ссылочную целостность данных: проверка включена при каждом подключении через команду `PRAGMA foreign_keys = ON;`.
 
 ## 4. Структура проекта
 
 ```text
 guest-list-service/
+├── data/
+│   ├── events.json
+│   ├── guests.json
+│   ├── statuses.json
+│   ├── invitations.json
+│   └── guestlist.sqlite           (файл реляционной базы данных SQLite)
+│
+├── sql/
+│   ├── schema.sql                 (DDL-скрипт создания таблиц и внешних ключей)
+│   └── queries.sql                (набор из 12 проверенных SQL-запросов)
+│
+├── db/
+│   ├── __init__.py
+│   ├── database.py                (модуль подключения get_connection)
+│   └── import_json.py             (скрипт переноса данных из JSON в SQLite)
+│
 ├── templates/
 │   ├── includes/
 │   │   └── navigation.html
@@ -45,17 +73,7 @@ guest-list-service/
 │
 ├── homepage/
 │   ├── static/
-│   │   └── homepage/
-│   │       ├── css/
-│   │       │   └── style.css
-│   │       ├── img/
-│   │       │   └── logo.png
-│   │       └── js/
-│   │           └── main.js
 │   ├── templates/
-│   │   └── homepage/
-│   │       └── index.html
-│   ├── apps.py
 │   ├── urls.py
 │   └── views.py
 │
@@ -65,10 +83,11 @@ guest-list-service/
 │   │       ├── includes/
 │   │       │   └── event_card.html
 │   │       ├── event_detail.html
-│   │       └── event_list.html
-│   ├── apps.py
+│   │       ├── event_list.html
+│   │       ├── event_search.html  (поиск событий по параметрам)
+│   │       └── statistics.html    (страница статистики)
 │   ├── urls.py
-│   └── views.py
+│   └── views.py                   (SQL-запросы к SQLite с sqlite3.Row)
 │
 ├── guests/
 │   ├── templates/
@@ -78,9 +97,8 @@ guest-list-service/
 │   │       ├── guest_detail.html
 │   │       ├── guest_invitations.html
 │   │       └── guest_list.html
-│   ├── apps.py
 │   ├── urls.py
-│   └── views.py
+│   └── views.py                   (SQL-запросы к SQLite)
 │
 ├── invitations/
 │   ├── templates/
@@ -90,35 +108,12 @@ guest-list-service/
 │   │       │   └── invitation_status.html
 │   │       ├── invitation_detail.html
 │   │       └── invitation_list.html
-│   ├── apps.py
 │   ├── urls.py
-│   └── views.py
+│   └── views.py                   (JOIN-запросы к SQLite)
 │
 ├── guestlist/                     (пакет конфигурации Django-проекта)
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-│
-├── models/                        (пакет предметной области из ПР3)
-│   ├── __init__.py
-│   ├── events.py
-│   ├── guests.py
-│   ├── statuses.py
-│   └── invitations.py
-│
-├── data/
-│   ├── events.json
-│   ├── guests.json
-│   ├── statuses.json
-│   └── invitations.json
-│
+├── models/                        (классы предметной области из ПР3)
 ├── tests/                         (автоматизированные тесты pytest)
-│   ├── test_events.py
-│   ├── test_guests.py
-│   ├── test_statuses.py
-│   └── test_invitations.py
-│
 ├── main.py                        (консольная версия из ПР3)
 ├── storage.py                     (модуль загрузки/сохранения JSON)
 ├── utils.py                       (вспомогательные функции)
@@ -128,157 +123,88 @@ guest-list-service/
 └── README.md
 ```
 
-## 5. Веб-интерфейс
+## 5. Слой работы с базой данных (ПР7)
 
-Веб-часть приложения полностью переведена на Django-шаблоны.
-Основные страницы:
-- Главная страница (`/`);
-- Список событий (`/events/`);
-- Страница отдельного события (`/events/<int:event_id>/`);
-- Список гостей (`/guests/`);
-- Страница отдельного гостя (`/guests/<int:guest_id>/`);
-- Список приглашений выбранного гостя (`/guests/<int:guest_id>/invitations/`);
-- Список приглашений (`/invitations/`);
-- Страница отдельного приглашения (`/invitations/<int:invitation_id>/`);
-- Пользовательская страница ошибки 404.
+1. **Создание схемы**:
+   Файл `sql/schema.sql` содержит команды `CREATE TABLE IF NOT EXISTS` с ограничениями `PRIMARY KEY`, `FOREIGN KEY`, `NOT NULL`, `UNIQUE`.
+2. **Подключение к базе**:
+   Модуль `db/database.py` предоставляет функцию `get_connection()`, которая открывает соединение с `data/guestlist.sqlite` и включает проверку внешних ключей `PRAGMA foreign_keys = ON;`.
+3. **Импорт данных из JSON**:
+   Скрипт `db/import_json.py` выполняет однократный или повторный перенос данных из `data/*.json` в SQLite с помощью `executemany()` и параметризованных вставок `VALUES (?, ?, ...)`, с защитой транзакции (`commit()` / `rollback()`).
+   Запуск:
+   ```text
+   python -m db.import_json
+   ```
+4. **SQL-запросы проекта**:
+   В `sql/queries.sql` зафиксировано 12 запросов, покрывающих все требуемые категории:
+   - Простая выборка (`SELECT`, `ORDER BY`);
+   - Фильтрация (`WHERE`);
+   - Многотабличные соединения (`JOIN`);
+   - Подзапросы (`NOT IN`);
+   - Агрегатные функции (`COUNT`, `MIN`, `MAX`, `AVG`);
+   - Группировка (`GROUP BY` и `LEFT JOIN`);
+   - Фильтрация групп (`HAVING`).
+5. **Интеграция с Django**:
+   Представления приложений `events`, `guests`, `invitations` получают данные из SQLite через соединение с `conn.row_factory = sqlite3.Row`, что позволяет обращаться к полям по именам столбцов и алиасов (`{{ event.name }}`, `{{ invitation.guest_name }}`).
 
-Генерация HTML непосредственно в Python-коде не используется (функция `page()` удалена).
-Представления подготавливают данные и передают их в шаблоны через словарь контекста.
+## 6. Веб-интерфейс и страницы
 
-## 6. Django Template Language
+- `/` — главная страница проекта;
+- `/events/` — список событий из SQLite;
+- `/events/<int:event_id>/` — карточка события;
+- `/events/search/` — параметризованный поиск событий по минимальной вместимости (`WHERE places >= ?`);
+- `/events/statistics/` — сводная статистика по событиям и приглашениям (`LEFT JOIN`, `GROUP BY`);
+- `/guests/` — список гостей из SQLite;
+- `/guests/<int:guest_id>/` — карточка гостя;
+- `/guests/<int:guest_id>/invitations/` — список приглашений гостя (выборка с `JOIN`);
+- `/invitations/` — список приглашений (объединение `invitations`, `events`, `guests`, `statuses`);
+- `/invitations/<int:invitation_id>/` — детальная страница приглашения.
 
-### Базовый шаблон
-Общий шаблон страниц — `templates/base.html`.
-Он содержит общую HTML-структуру страницы, подключение Bootstrap, подключение собственных стилей `style.css`, логотипа `logo.png`, навигации `navigation.html`, подвала с автоматической установкой года через `main.js` и блоки для содержимого отдельных страниц:
-- `{% block title %}` — заголовок страницы;
-- `{% block content %}` — основное содержимое.
+## 7. Запуск проекта
 
-Дочерние шаблоны используют наследование:
-```html
-{% extends "base.html" %}
+Импорт данных в SQLite (при необходимости пересоздания базы):
+```text
+python -m db.import_json
 ```
 
-### Включаемые шаблоны
-Повторяющиеся фрагменты вынесены во включаемые шаблоны:
-- `templates/includes/navigation.html` — общая навигация сайта;
-- `events/templates/events/includes/event_card.html` — карточка события;
-- `guests/templates/guests/includes/guest_card.html` — карточка гостя;
-- `invitations/templates/invitations/includes/invitation_card.html` — карточка приглашения в списке;
-- `invitations/templates/invitations/includes/invitation_status.html` — цветной бейдж статуса приглашения.
-
-Подключение выполняется тегом `{% include "..." %}`.
-
-### Контекст
-Представления передают данные в шаблоны через словарь `context`.
-Например, во view:
-```python
-context = {"events": events_list}
-return render(request, "events/event_list.html", context)
-```
-В шаблоне данные доступны по именам ключей словаря: `{{ events }}`.
-
-### Циклы и условия
-Для формирования списков используются циклы `{% for %}` с веткой отсутствия данных `{% empty %}`:
-```html
-{% for event in events %}
-    {% include "events/includes/event_card.html" %}
-{% empty %}
-    <p>События не найдены.</p>
-{% endfor %}
-```
-Условия `{% if %}` используются для отображения статусов, проверки совершеннолетия гостя и обработки отсутствия объектов на детальных страницах.
-
-## 7. Фильтры шаблонов
-
-В шаблонах применяются стандартные фильтры Django:
-- `{{ events|length }}` — подсчёт общего количества элементов в списке;
-- `{{ event.name|default:"Без названия" }}` — вывод значения по умолчанию при отсутствии имени.
-
-Фильтры используются исключительно для форматирования представления и не содержат бизнес-логику.
-
-## 8. URL-маршрутизация и пространства имён
-
-Для всех приложений настроены пространства имён (`app_name`):
-- `homepage` (`homepage:index`);
-- `events` (`events:list`, `events:detail`);
-- `guests` (`guests:list`, `guests:detail`, `guests:invitations`);
-- `invitations` (`invitations:list`, `invitations:detail`).
-
-Ссылки в шаблонах формируются исключительно через тег `{% url %}`, например:
-```html
-<a href="{% url 'events:list' %}">События</a>
-<a href="{% url 'events:detail' event.id %}">Подробнее</a>
-```
-
-## 9. Статические файлы
-
-Статические файлы проекта размещены в приложении `homepage`:
-`homepage/static/homepage/`
-- `css/style.css` — собственные стили для карточек (`.event-card`, `.guest-card`, `.invitation-card`), логотипа (`.guestlist-logo`) и бейджей;
-- `js/main.js` — клиентский скрипт, автоматически устанавливающий текущий год в футере;
-- `img/logo.png` — графический логотип проекта.
-
-Для подключения статики в базовом шаблоне используется `{% load static %}` и теги `{% static "..." %}`.
-
-## 10. Хранение данных
-
-Данные приложения по-прежнему хранятся в JSON-файлах:
-- `data/events.json`;
-- `data/guests.json`;
-- `data/statuses.json`;
-- `data/invitations.json`.
-
-Загрузка данных выполняется функциями модуля `storage.py`. Предметные объекты создаются на основе классов каталога `models/`.
-Django ORM на текущем этапе не используется.
-
-## 11. Запуск проекта
-
-Веб-версия (Django):
+Запуск веб-сервера Django:
 ```text
 python manage.py runserver
 ```
-После запуска веб-интерфейс доступен по адресу:
-`http://127.0.0.1:8000/`
+Веб-интерфейс доступен по адресу: `http://127.0.0.1:8000/`
 
 Консольная версия:
 ```text
 python main.py
 ```
 
-## 12. Тестирование и качество кода
+## 8. Тестирование и качество кода
 
-Запуск автоматических тестов:
-```text
-pytest -v
-```
+- Системная проверка Django:
+  ```text
+  python manage.py check
+  ```
+- Запуск тестов:
+  ```text
+  pytest -v
+  ```
+- Проверка PEP 8:
+  ```text
+  flake8 . --extend-exclude=.venv
+  ```
 
-Системная проверка Django:
-```text
-python manage.py check
-```
+## 9. Текущее состояние и дальнейшее развитие
 
-Проверка соответствия PEP 8 (flake8):
-```text
-flake8 . --extend-exclude=.venv
-```
-
-## 13. Текущее состояние и дальнейшее развитие
-
-Реализовано в ПР6:
-- Веб-интерфейс полностью переведён на Django-шаблоны;
-- Создан базовый каркас `templates/base.html`;
-- Организовано наследование шаблонов (`extends`) и блоки (`block`);
-- Вынесены включаемые шаблоны (`include`);
-- Настроена передача данных через контекст;
-- Использованы циклы (`for`), ветки `empty` и условия (`if`);
-- Настроены именованные маршруты и пространства имён (`app_name`);
-- Применены фильтры шаблонов (`length`, `default`);
-- Подключены собственные статические файлы (CSS, JS, логотип);
-- Сохранена полная работоспособность консольной версии и тестов ПР3.
+Реализовано в ПР7:
+- Спроектирована реляционная база данных `guestlist.sqlite`;
+- Разработана схема таблиц `sql/schema.sql` с внешними ключами;
+- Реализован скрипт импорта `db/import_json.py`;
+- Написаны и протестированы 12 SQL-запросов в `sql/queries.sql`;
+- Django-представления переведены на получение данных из SQLite через `sqlite3.Row`;
+- Реализованы сценарии поиска по параметрам и страницы статистики;
+- Сохранена полная совместимость с ПР1–ПР6 (JSON, ООП-модели, тесты).
 
 Планируется на следующих этапах:
-- Переход от JSON-файлов к реляционной базе данных и Django ORM;
-- Формы создания, изменения и удаления объектов;
-- Аутентификация и разграничение прав пользователей;
-- Разработка REST API;
-- Контейнеризация и настройка CI/CD.
+- Переход к Django ORM и моделям Django;
+- Использование миграций Django вместо прямых SQL-скриптов;
+- Создание веб-форм для добавления и изменения данных через POST-запросы.

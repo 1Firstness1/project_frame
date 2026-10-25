@@ -1,13 +1,13 @@
-{% if invitation.is_confirmed %}
+{% if invitation.status_code == 'confirmed' %}
     <span class="badge bg-success invitation-status">
         Подтверждено
     </span>
-{% elif invitation.is_pending %}
+{% elif invitation.status_code == 'pending' %}
     <span class="badge bg-warning text-dark invitation-status">
         Ожидает ответа
     </span>
 {% else %}
     <span class="badge bg-secondary invitation-status">
-        {{ invitation.status.title|default:"Отклонено" }}
+        {{ invitation.status_title|default:"Отклонено" }}
     </span>
 {% endif %}

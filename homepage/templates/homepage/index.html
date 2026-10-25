@@ -6,12 +6,16 @@
 <div class="p-5 mb-4 bg-light rounded-3 border">
     <div class="container-fluid py-2">
         <h1 class="display-5 fw-bold">Сервис управления списком гостей</h1>
-        <p class="col-md-8 fs-4 text-muted">Учёт событий, гостей и статусов приглашений.</p>
+        <p class="col-md-8 fs-4 text-muted">
+            Учёт событий, гостей и статусов приглашений на базе SQLite и SQL.
+        </p>
         <p class="fw-semibold">Основные разделы:</p>
         <div class="d-flex gap-2 flex-wrap">
             <a href="{% url 'events:list' %}" class="btn btn-primary">События</a>
             <a href="{% url 'guests:list' %}" class="btn btn-secondary">Гости</a>
             <a href="{% url 'invitations:list' %}" class="btn btn-success">Приглашения</a>
+            <a href="{% url 'events:search' %}" class="btn btn-outline-primary">Поиск по вместимости</a>
+            <a href="{% url 'events:statistics' %}" class="btn btn-outline-success">Статистика</a>
         </div>
     </div>
 </div>

@@ -1,30 +1,34 @@
-"""View-функции приложения invitations."""
+"""View-функции приложения invitations, работающие со слоем SQLite."""
 
+import sqlite3
 from django.shortcuts import render
 
-from models.invitations import find_invitation_by_id
-from storage import (
-    load_events,
-    load_guests,
-    load_invitations,
-    load_statuses,
-)
-
-
-def _load_all():
-    """Загрузить все связанные коллекции предметной области."""
-    events = load_events("data/events.json")
-    guests = load_guests("data/guests.json")
-    statuses = load_statuses("data/statuses.json")
-    invitations = load_invitations(
-        "data/invitations.json", events, guests, statuses
-    )
-    return events, guests, statuses, invitations
+from db.database import get_connection
 
 
 def invitations(request):
-    """Страница со списком приглашений."""
-    _, _, _, invitations_list = _load_all()
+    """Страница со списком приглашений (JOIN 4 таблиц) из SQLite."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        invitations_list = conn.execute(
+            """
+            SELECT invitations.id,
+                   events.name AS event_name,
+                   events.date AS event_date,
+                   guests.name AS guest_name,
+                   statuses.title AS status_title,
+                   statuses.code AS status_code
+            FROM invitations
+            JOIN events ON invitations.event_id = events.id
+            JOIN guests ON invitations.guest_id = guests.id
+            JOIN statuses ON invitations.status_id = statuses.id
+            ORDER BY events.date ASC;
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
     context = {
         "invitations": invitations_list,
     }
@@ -32,9 +36,30 @@ def invitations(request):
 
 
 def invitation_detail(request, invitation_id):
-    """Страница отдельного приглашения."""
-    _, _, _, invitations_list = _load_all()
-    invitation = find_invitation_by_id(invitations_list, invitation_id)
+    """Страница отдельного приглашения из SQLite."""
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    try:
+        invitation = conn.execute(
+            """
+            SELECT invitations.id,
+                   events.name AS event_name,
+                   events.date AS event_date,
+                   guests.name AS guest_name,
+                   guests.age AS guest_age,
+                   statuses.title AS status_title,
+                   statuses.code AS status_code
+            FROM invitations
+            JOIN events ON invitations.event_id = events.id
+            JOIN guests ON invitations.guest_id = guests.id
+            JOIN statuses ON invitations.status_id = statuses.id
+            WHERE invitations.id = ?;
+            """,
+            (invitation_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
     context = {
         "invitation": invitation,
     }
