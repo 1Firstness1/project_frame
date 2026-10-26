@@ -96,7 +96,7 @@ def event_statistics(request):
     conn = get_connection()
     conn.row_factory = sqlite3.Row
     try:
-        # Общая статистика по всем событиям (LEFT JOIN + GROUP BY)
+        # Группировка по связанным сущностям (событиям)
         stats = conn.execute(
             """
             SELECT events.id,
@@ -108,6 +108,19 @@ def event_statistics(request):
             LEFT JOIN invitations ON events.id = invitations.event_id
             GROUP BY events.id, events.name, events.date, events.places
             ORDER BY invitations_count DESC;
+            """
+        ).fetchall()
+
+        # Группировка по категориям (статусам приглашений)
+        status_stats = conn.execute(
+            """
+            SELECT statuses.title AS status_title,
+                   statuses.code AS status_code,
+                   COUNT(invitations.id) AS count
+            FROM statuses
+            LEFT JOIN invitations ON statuses.id = invitations.status_id
+            GROUP BY statuses.id, statuses.title, statuses.code
+            ORDER BY count DESC;
             """
         ).fetchall()
 
@@ -138,6 +151,7 @@ def event_statistics(request):
 
     context = {
         "statistics": stats,
+        "status_stats": status_stats,
         "having_stats": having_stats,
         "threshold": threshold,
         "total_guests": total_guests,

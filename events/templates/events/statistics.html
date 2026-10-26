@@ -20,6 +20,18 @@
     </div>
 </div>
 
+<h2 class="h4 mb-3">Группировка по категориям (статусы — GROUP BY)</h2>
+<div class="row g-3 mb-4">
+    {% for item in status_stats %}
+        <div class="col-md-4">
+            <div class="card p-3 border shadow-sm">
+                <span class="text-muted">Статус: <strong>{{ item.status_title }}</strong></span>
+                <span class="display-6 fw-bold text-dark mt-1">{{ item.count }}</span>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
 <div class="card p-3 mb-4 border shadow-sm">
     <h3 class="h5 mb-2">Фильтрация групп с помощью HAVING</h3>
     <p class="text-muted small mb-3">
@@ -81,7 +93,7 @@
     </div>
 </div>
 
-<h2 class="h4 mb-3">Все события (LEFT JOIN + GROUP BY)</h2>
+<h2 class="h4 mb-3">Группировка по связанным сущностям (события — GROUP BY)</h2>
 <div class="table-responsive">
     <table class="table table-striped table-hover align-middle">
         <thead class="table-light">
@@ -89,7 +101,7 @@
                 <th>Событие</th>
                 <th>Дата</th>
                 <th>Мест всего</th>
-                <th>Приглашено гостей</th>
+                <th>Приглашено гостей (COUNT)</th>
             </tr>
         </thead>
         <tbody>

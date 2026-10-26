@@ -76,7 +76,7 @@ SELECT COUNT(*) AS total_guests,
        ROUND(AVG(age), 1) AS avg_age
 FROM guests;
 
--- 11. Количество приглашений по событиям с LEFT JOIN и группировкой
+-- 11. Количество приглашений по событиям с LEFT JOIN и группировкой (GROUP BY)
 SELECT events.id,
        events.name AS event_name,
        COUNT(invitations.id) AS invitations_count
@@ -92,4 +92,12 @@ FROM events
 JOIN invitations ON events.id = invitations.event_id
 GROUP BY events.id, events.name
 HAVING COUNT(invitations.id) > 1
+ORDER BY invitations_count DESC;
+
+-- 13. Группировка приглашений по категориям/статусам (GROUP BY)
+SELECT statuses.title AS status_title,
+       COUNT(invitations.id) AS invitations_count
+FROM statuses
+LEFT JOIN invitations ON statuses.id = invitations.status_id
+GROUP BY statuses.id, statuses.title
 ORDER BY invitations_count DESC;
