@@ -168,7 +168,7 @@ python -m db.import_json
 ```
 
 Запуск веб-сервера Django:
-```text
+```bash
 python manage.py runserver
 ```
 Веб-интерфейс доступен по адресу: `http://127.0.0.1:8000/`
