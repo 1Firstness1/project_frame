@@ -163,7 +163,7 @@ guest-list-service/
 ## 7. Запуск проекта
 
 Импорт данных в SQLite (при необходимости пересоздания базы):
-```text
+```bash
 python -m db.import_json
 ```
 

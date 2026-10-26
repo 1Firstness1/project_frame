@@ -86,10 +86,17 @@ def search_events(request):
 
 
 def event_statistics(request):
-    """Страница статистики бронирований/приглашений по событиям."""
+    """Страница статистики с использованием GROUP BY и HAVING."""
+    threshold_str = request.GET.get("threshold", "1").strip()
+    try:
+        threshold = int(threshold_str)
+    except ValueError:
+        threshold = 1
+
     conn = get_connection()
     conn.row_factory = sqlite3.Row
     try:
+        # Общая статистика по всем событиям (LEFT JOIN + GROUP BY)
         stats = conn.execute(
             """
             SELECT events.id,
@@ -104,6 +111,21 @@ def event_statistics(request):
             """
         ).fetchall()
 
+        # Фильтрация групп с помощью HAVING
+        having_stats = conn.execute(
+            """
+            SELECT events.id,
+                   events.name AS event_name,
+                   COUNT(invitations.id) AS invitations_count
+            FROM events
+            JOIN invitations ON events.id = invitations.event_id
+            GROUP BY events.id, events.name
+            HAVING COUNT(invitations.id) > ?
+            ORDER BY invitations_count DESC;
+            """,
+            (threshold,),
+        ).fetchall()
+
         total_guests = conn.execute(
             "SELECT COUNT(*) AS total FROM guests;"
         ).fetchone()["total"]
@@ -116,6 +138,8 @@ def event_statistics(request):
 
     context = {
         "statistics": stats,
+        "having_stats": having_stats,
+        "threshold": threshold,
         "total_guests": total_guests,
         "total_invitations": total_invitations,
     }

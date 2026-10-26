@@ -20,7 +20,68 @@
     </div>
 </div>
 
-<h2 class="h4 mb-3">Количество приглашений по событиям</h2>
+<div class="card p-3 mb-4 border shadow-sm">
+    <h3 class="h5 mb-2">Фильтрация групп с помощью HAVING</h3>
+    <p class="text-muted small mb-3">
+        Выбирает только те события, у которых число приглашений <strong>строго больше порога</strong> (запрос <code>HAVING COUNT(invitations.id) &gt; {{ threshold }}</code>).
+    </p>
+    <form method="get" class="row g-2 align-items-center mb-3">
+        <div class="col-auto">
+            <label for="threshold" class="col-form-label fw-semibold">
+                Порог (приглашений &gt;):
+            </label>
+        </div>
+        <div class="col-auto">
+            <input type="number"
+                   id="threshold"
+                   name="threshold"
+                   class="form-control form-control-sm"
+                   value="{{ threshold }}"
+                   min="0"
+                   style="width: 80px;"
+                   required>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-primary">
+                Применить HAVING
+            </button>
+            <a href="{% url 'events:statistics' %}" class="btn btn-sm btn-outline-secondary">
+                Сброс (порог = 1)
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Событие</th>
+                    <th>Количество приглашений (COUNT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in having_stats %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.event_name }}</td>
+                        <td>
+                            <span class="badge bg-success fs-6">
+                                {{ item.invitations_count }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-2">
+                            Нет событий с количеством приглашений &gt; {{ threshold }}.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h2 class="h4 mb-3">Все события (LEFT JOIN + GROUP BY)</h2>
 <div class="table-responsive">
     <table class="table table-striped table-hover align-middle">
         <thead class="table-light">
